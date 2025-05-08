@@ -1,0 +1,60 @@
+# =====================
+# Node.js + Express
+# =====================
+
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Environment variables
+.env
+.env.*     # e.g., .env.development, .env.production
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE configs
+.vscode/
+.idea/
+
+# Coverage and testing
+coverage/
+nyc_output/
+
+# Build output
+dist/
+build/
+
+# Misc
+*.swp
+*.swo
+*.bak
+*.orig
+
+# Optional Render stuff
+render.yaml
+
+# If using PM2 or nodemon
+pids/
+pids/*.pid
+pids/*.log
+
+# If using Prisma
+prisma/migrations/
+
+# If using uploads/temp folders
+uploads/
+tmp/
