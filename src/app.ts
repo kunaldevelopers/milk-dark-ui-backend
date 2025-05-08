@@ -11,7 +11,7 @@ import { config } from "./config";
 import { initializeDummyUsers } from "./scripts/createDummyUsers";
 import { initializeDefaultSettings } from "./models/Settings";
 
-dotenv.config();
+dotenv.config({ path: './.env' });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: process.env.CORS_ORIGIN,
     credentials: true,
     exposedHeaders: ["Authorization", "X-User-Role"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
