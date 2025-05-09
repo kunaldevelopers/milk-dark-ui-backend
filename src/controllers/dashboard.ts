@@ -65,6 +65,13 @@ export const getDashboardData = async (req: Request, res: Response) => {
     // Get shift analytics
     const shiftAnalytics = await getShiftAnalytics(startDate, endDate);
 
+    // Get priority clients
+    const priorityClients = await getPriorityClientsData(
+      startDate,
+      endDate,
+      shiftFilter
+    );
+
     // Send dashboard data
     res.json({
       counts: {
@@ -91,6 +98,7 @@ export const getDashboardData = async (req: Request, res: Response) => {
       assignmentStatus: {
         totalQuantityAssigned: assignedQuantity,
       },
+      priorityClients,
       deliveryRecords,
       staffPerformance,
       shiftAnalytics,
@@ -549,6 +557,59 @@ export const getDeliveryTrends = async (req: Request, res: Response) => {
 /**
  * Get non-delivery reasons summary
  */
+/**
+ * Get priority clients data for dashboard
+ */
+const getPriorityClientsData = async (
+  startDate: Date,
+  endDate: Date,
+  shiftFilter?: string
+) => {
+  try {
+    // Create a matching condition based on date and shift
+    const matchCondition: any = {
+      priorityStatus: true,
+    };
+
+    // Add shift filter if provided
+    if (shiftFilter) {
+      matchCondition.timeShift = shiftFilter;
+    }
+
+    // First, get all priority clients
+    const priorityClients = await Client.find(matchCondition)
+      .select("_id name location timeShift quantity deliveryStatus")
+      .lean();
+
+    // Get the latest delivery status for these clients
+    const clientIds = priorityClients.map((client) => client._id);
+    // Get today's delivery records for these clients
+    const deliveryRecords = await DailyDelivery.find({
+      clientId: { $in: clientIds },
+      date: { $gte: startDate, $lte: endDate },
+    }).lean(); // Create a map of client ID to delivery status
+    const deliveryStatusMap = new Map();
+    deliveryRecords.forEach((record) => {
+      deliveryStatusMap.set(record.clientId.toString(), record.deliveryStatus);
+    });
+
+    // Merge the data
+    const priorityClientData = priorityClients.map((client) => {
+      const deliveryStatus =
+        deliveryStatusMap.get(client._id.toString()) || "Pending";
+      return {
+        ...client,
+        deliveryStatus,
+      };
+    });
+
+    return priorityClientData;
+  } catch (error) {
+    console.error("Error fetching priority clients data:", error);
+    return [];
+  }
+};
+
 export const getNonDeliveryReasons = async (req: Request, res: Response) => {
   try {
     const { startDate, endDate } = req.query;
